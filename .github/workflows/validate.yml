@@ -1,0 +1,32 @@
+name: PR Validate (Scratch)
+on:
+  pull_request:
+    branches: [ main ]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Salesforce CLI & Scanner
+        run: npm i -g @salesforce/cli @salesforce/sfdx-scanner
+
+      - name: Auth Dev Hub
+        run: echo "${{ secrets.SF_DEVHUB_AUTH_URL }}" | sf org login sfdx-url --set-default-dev-hub -a DevHub
+
+      - name: Create Scratch Org
+        run: sf org create scratch -f config/project-scratch-def.json -a pr-${{ github.run_id }} -d 1 --no-track-source
+
+      - name: Deploy Source
+        run: sf project deploy start -o pr-${{ github.run_id }}
+
+      - name: Static Analysis (non-blocking)
+        run: sfdx scanner:run --target "force-app/**" --severity-threshold 3 --format table || true
+
+      - name: Run Apex Tests
+        run: sf apex run test -o pr-${{ github.run_id }} --test-level RunLocalTests
+
+      - name: Delete Scratch Org
+        if: always()
+        run: sf org delete scratch -o pr-${{ github.run_id }} -p
+
