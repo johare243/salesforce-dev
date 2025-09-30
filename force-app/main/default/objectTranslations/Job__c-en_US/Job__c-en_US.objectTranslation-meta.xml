@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Job</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Jobs</value>
+    </caseValues>
+    <fieldSets>
+        <label><!-- Test --></label>
+        <name>Test</name>
+    </fieldSets>
+    <layouts>
+        <layout>Job Layout</layout>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>Shavings Delivery</layout>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+    </layouts>
+    <recordTypes>
+        <label><!-- Can Delivery --></label>
+        <name>Can_Delivery</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Can Pickup --></label>
+        <name>Can_Pickup</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Can Swap --></label>
+        <name>Can_Swap</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Disposal --></label>
+        <name>Disposal</name>
+    </recordTypes>
+    <recordTypes>
+        <description><!-- Shavings delivery + Can swap --></description>
+        <label><!-- Drop and Swap --></label>
+        <name>Drop_and_Swap</name>
+    </recordTypes>
+    <recordTypes>
+        <description><!-- Disposal of Can&apos;s contents + return of the Can --></description>
+        <label><!-- Dump and Return --></label>
+        <name>Dump_and_Return</name>
+    </recordTypes>
+    <recordTypes>
+        <description><!-- Delivery of Shavings only. --></description>
+        <label><!-- Shavings Delivery --></label>
+        <name>Shavings_Delivery</name>
+    </recordTypes>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

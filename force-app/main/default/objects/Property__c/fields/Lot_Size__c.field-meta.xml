@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Lot_Size__c</fullName>
+    <defaultValue>1</defaultValue>
+    <description>Lot size in acres</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Lot size in acres (e.g. 0.40 or 1.75 acres).</inlineHelpText>
+    <label>Lot Size</label>
+    <precision>6</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>
