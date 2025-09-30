@@ -1,0 +1,18 @@
+# user/org specific noise
+**/profiles/*
+**/profileSettings/*
+**/networkBranding/*
+**/companySettings/*
+**/siteDotComSites/*
+**/contentassets/*
+**/RemoteSiteSettings/*
+**/CallCenters/*
+**/AuthProviders/*
+**/NamedCredentials/*
+**/EmailServicesFunction/*
+**/ActionLinkGroupTemplates/*
+**/InstalledPackages/*
+
+# scratch-only cache
+**/aura/*/aura_staticresources/*
+
