@@ -1,16 +1,6 @@
 {
-  "orgName": "Demo company",
+  "orgName": "DevHub-DE",
   "edition": "Developer",
   "features": ["AuthorApex"],
-  "settings": {
-    "lightningExperienceSettings": {
-      "enableS1DesktopEnabled": true
-    },
-    "mobileSettings": {
-      "enableS1EncryptedStoragePref2": false
-    },
-    "securitySettings": {
-      "enableSetPasswordInApi": true
-    }
-  }
+  "settings": { "apexSettings": { "enableCompileOnDeploy": true } }
 }
