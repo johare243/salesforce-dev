@@ -1,47 +1,45 @@
-name: PR Validate (Scratch)
-on:
-  pull_request:
-    branches: [main]
-permissions:
-  contents: read
-  id-token: write
-concurrency:
-  group: pr-${{ github.ref }}
-  cancel-in-progress: true
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     env:
-      ORG_ALIAS: "pr-${{ github.run_id }}"
+      DEV_HUB_ALIAS: DevHubCI
+      ORG_ALIAS: pr-${{ github.run_id }}
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-      - run: npm i -g @salesforce/cli @salesforce/sfdx-scanner
+        with: { node-version: 20 }
+      - name: Install SF CLI
+        run: npm i -g @salesforce/cli @salesforce/sfdx-scanner
+
+      # 1) Auth hub (stdin) + set default (ok), but don't rely on it
       - name: Auth Dev Hub
         run: |
-          printf '%s' "$SFDX_AUTH_URL" sf org login sfdx-url --sfdx-url-stdin --set-default-dev-hub -a DevHub
-      - name: Create Scratch Org
-        run: sf org create scratch -f config/project-scratch-def.json -a "$ORG_ALIAS" -d 1 --no-track-source
-      - name: Deploy
-        run: sf project deploy start -o "$ORG_ALIAS" --ignore-warnings
-      - name: Run affected tests (fallback full)
-        shell: bash
+          printf '%s' '${{ secrets.SF_DEVHUB_AUTH_URL }}' \
+            | sf org login sfdx-url --sfdx-url-stdin \
+                --set-default-dev-hub -a "$DEV_HUB_ALIAS"
+          # Optional: also set config default (persists in runner HOME)
+          sf config set target-dev-hub="$DEV_HUB_ALIAS"
+
+      # 2) Sanity gate (fail fast if alias missing or not a hub)
+      - name: Verify Dev Hub
         run: |
-          set -euo pipefail
-          git fetch --no-tags --depth=1 origin main
-          CHANGED=$(git diff --name-only --diff-filter=ACMR origin/main...HEAD | grep -E '^force-app/.*/classes/.*\.cls$' || true)
-          DIRECT_TESTS=$(echo "$CHANGED" | grep -E 'Test\.cls$' | xargs -I{} basename {} .cls | paste -sd, - || true)
-          CANDIDATES=$(echo "$CHANGED" | grep -Ev 'Test\.cls$' | xargs -I{} basename {} .cls | sed -E 's/$/Test/' | paste -sd, - || true)
-          HAS_TESTS=$( (echo "$CANDIDATES" | tr ',' '\n' | while read -r t; do test -f "force-app/main/default/classes/${t}.cls" && echo "$t"; done) | paste -sd, - || true)
-          TESTS=$(printf "%s,%s\n" "${DIRECT_TESTS:-}" "${HAS_TESTS:-}" | tr ',' '\n' | awk 'NF && !seen[$0]++' | paste -sd, -)
-          if [[ -n "$TESTS" ]]; then
-            sf apex run test -o "$ORG_ALIAS" --tests "$TESTS" --result-format junit --wait 30 | tee test-results.xml
-          else
-            sf apex run test -o "$ORG_ALIAS" --code-coverage --result-format junit --wait 30 --test-level RunLocalTests | tee test-results.xml
-          fi
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with: { name: junit, path: test-results.xml }
+          sf org display -v "$DEV_HUB_ALIAS" --verbose
+          sf org list --all
+
+      # 3) Always pass -v to be bulletproof
+      - name: Create Scratch Org
+        run: |
+          sf org create scratch \
+            -v "$DEV_HUB_ALIAS" \
+            -f config/project-scratch-def.json \
+            -a "$ORG_ALIAS" -d 1 --no-track-source
+
+      - name: Deploy
+        run: sf project deploy start -v "$DEV_HUB_ALIAS" -o "$ORG_ALIAS" --ignore-warnings
+
+      - name: Run tests
+        run: sf apex run test -v "$DEV_HUB_ALIAS" -o "$ORG_ALIAS" --wait 30 --test-level RunLocalTests
+
       - if: always()
         run: sf org delete scratch -o "$ORG_ALIAS" -p || true
