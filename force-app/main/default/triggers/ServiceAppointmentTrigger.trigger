@@ -1,3 +1,2 @@
-trigger ServiceAppointmentTrigger on SOBJECT (before insert) {
-
+trigger ServiceAppointmentTrigger on ServiceAppointment(before insert) {
 }

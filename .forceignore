@@ -16,3 +16,25 @@
 # scratch-only cache
 **/aura/*/aura_staticresources/*
 
+# --- standard/managed apps & content types
+**/applications/standard__*/**
+**/appMenus/**
+**/ManagedContentType/**
+**/NotificationTypeConfig/**
+
+# --- org-wide Settings that aren’t portable or need licenses
+**/settings/**
+# selectively allow what you truly control by whitelisting later if needed
+
+# --- Experience/Communities (optional; enable later)
+**/experiences/**
+**/siteDotComSites/**
+
+# --- FlowDefinition (deploy Flows; not the definitions pointing to prod versions)
+**/flowDefinitions/**
+
+# --- Reports/Dashboards/Einstein/etc. (if not needed)
+**/reports/**
+**/dashboards/**
+**/aura/** # if you only use LWC
+
