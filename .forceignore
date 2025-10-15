@@ -36,6 +36,7 @@
 
 # ---------- Analytics/Reports (usually out of scope for core pkg) ----------
 **/reports/**
+**/reportTypes/**
 **/dashboards/**
 
 # ---------- FlowDefinitions (deploy Flows themselves, not version pointers) ----------
