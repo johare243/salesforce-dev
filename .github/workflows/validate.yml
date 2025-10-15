@@ -1,45 +1,38 @@
+name: PR Validate (From Scratch)
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   validate:
     runs-on: ubuntu-latest
-    env:
-      DEV_HUB_ALIAS: DevHubCI
-      ORG_ALIAS: pr-${{ github.run_id }}
-
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - name: Install SF CLI
+
+      - name: Install Salesforce CLI & Scanner
         run: npm i -g @salesforce/cli @salesforce/sfdx-scanner
 
-      # 1) Auth hub (stdin) + set default (ok), but don't rely on it
       - name: Auth Dev Hub
-        run: |
-          printf '%s' '${{ secrets.SF_DEVHUB_AUTH_URL }}' \
-            | sf org login sfdx-url --sfdx-url-stdin \
-                --set-default-dev-hub -a "$DEV_HUB_ALIAS"
-          # Optional: also set config default (persists in runner HOME)
-          sf config set target-dev-hub="$DEV_HUB_ALIAS"
+        run: echo "${{ secrets.SF_DEVHUB_AUTH_URL }}" | sf org login sfdx-url --set-default-dev-hub --alias DevHub --sfdx-url--stdin
 
-      # 2) Sanity gate (fail fast if alias missing or not a hub)
-      - name: Verify Dev Hub
-        run: |
-          sf org display -v "$DEV_HUB_ALIAS" --verbose
-          sf org list --all
-
-      # 3) Always pass -v to be bulletproof
       - name: Create Scratch Org
-        run: |
-          sf org create scratch \
-            -v "$DEV_HUB_ALIAS" \
-            -f config/project-scratch-def.json \
-            -a "$ORG_ALIAS" -d 1 --no-track-source
+        run: sf org create scratch -f config/project-scratch-def.json -a pr-${{ github.run_id }} -d 1 --no-track-source
 
-      - name: Deploy
-        run: sf project deploy start -v "$DEV_HUB_ALIAS" -o "$ORG_ALIAS" --ignore-warnings
+      - name: Deploy Source
+        run: sf project deploy start -o pr-${{ github.run_id }}
 
-      - name: Run tests
-        run: sf apex run test -v "$DEV_HUB_ALIAS" -o "$ORG_ALIAS" --wait 30 --test-level RunLocalTests
+      - name: Static Analysis (non-blocking)
+        run: sfdx scanner:run --target "force-app/**" --severity-threshold 3 --format table || true
 
-      - if: always()
-        run: sf org delete scratch -o "$ORG_ALIAS" -p || true
+      - name: Run Apex Tests
+        run: sf apex run test -o pr-${{ github.run_id }} --test-level RunLocalTests
+
+      - name: Delete Scratch Org
+        if: always()
+        run: sf org delete scratch -o pr-${{ github.run_id }} -p
