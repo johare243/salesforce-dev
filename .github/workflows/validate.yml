@@ -22,7 +22,7 @@ jobs:
         run: echo "${{ secrets.SF_DEVHUB_AUTH_URL }}" | sf org login sfdx-url --set-default-dev-hub --alias DevHub --sfdx-url-stdin
 
       - name: Create Scratch Org
-        run: sf org create scratch --definition-file config/project-scratch-def.json --alias ${{ github.run_id}} --duration-days 1 --wait 20 --set-default
+        run: sf org create scratch --definition-file config/project-scratch-def.json --alias pr-${{ github.run_id}} --duration-days 1 --wait 20 --set-default
 
       - name: Deploy Source
         run: sf project deploy start -o pr-${{ github.run_id }}
