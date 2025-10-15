@@ -1,9 +1,16 @@
-# user/org specific noise
+# =========================================================
+# CI-SAFE .forceignore (custom-package-only)
+# Keep: custom objects (__c, __mdt), their layouts, code, LWC, flows, perm sets
+# Drop: standard/managed apps, org-wide settings, reports/dashboards,
+#       communities/site.com, flowDefinitions, profiles, etc.
+# Order matters: broad excludes first, then selective re-includes (!) below.
+# =========================================================
+
+# ---------- User/org specific & non-portable ----------
 **/profiles/*
 **/profileSettings/*
 **/networkBranding/*
 **/companySettings/*
-**/siteDotComSites/*
 **/contentassets/*
 **/RemoteSiteSettings/*
 **/CallCenters/*
@@ -13,28 +20,64 @@
 **/ActionLinkGroupTemplates/*
 **/InstalledPackages/*
 
-# scratch-only cache
-**/aura/*/aura_staticresources/*
-
-# --- standard/managed apps & content types
-**/applications/standard__*/**
-**/appMenus/**
-**/ManagedContentType/**
+# ---------- Platform/managed UI we don't deploy ----------
+**/applications/standard__/**        # std apps (DataManager, FlowsApp, etc.)
+**/appMenus/**                        # app switcher menu entries
+**/ManagedContentType/**              # CMS managed content types
+**/cms/**                             # any CMS artifacts
 **/NotificationTypeConfig/**
 
-# --- org-wide Settings that aren’t portable or need licenses
-**/settings/**
-# selectively allow what you truly control by whitelisting later if needed
+# ---------- Org-wide settings (license/edition dependent) ----------
+**/settings/**                        # re-include specific ones later if truly needed
 
-# --- Experience/Communities (optional; enable later)
+# ---------- Communities/Experience (optional: enable later) ----------
 **/experiences/**
-**/siteDotComSites/**
+**/siteDotComSites/**                 # (deduped: only listed once)
 
-# --- FlowDefinition (deploy Flows; not the definitions pointing to prod versions)
-**/flowDefinitions/**
-
-# --- Reports/Dashboards/Einstein/etc. (if not needed)
+# ---------- Analytics/Reports (usually out of scope for core pkg) ----------
 **/reports/**
 **/dashboards/**
-**/aura/** # if you only use LWC
+
+# ---------- FlowDefinitions (deploy Flows themselves, not version pointers) ----------
+**/flowDefinitions/**
+
+# ---------- Aura (if you only ship LWC; keep if you do NOT use Aura) ----------
+**/aura/**
+
+# ---------- Scratch-only cache/noise ----------
+**/aura/*/aura_staticresources/*
+
+# =========================================================
+# Selective scoping: exclude broad, re-include only custom
+# =========================================================
+
+# Objects: exclude all, include only custom SObjects & MDT
+**/objects/**
+!**/objects/*__c/**
+!**/objects/*__mdt/**
+
+# Layouts: exclude all, include only layouts that belong to custom objects
+**/layouts/**
+!**/layouts/*__c-*.layout-meta.xml
+
+# (Optional) Permission Sets: keep (remove the next line if you want to exclude)
+# (No rule needed; by default we keep **/permissionsets/**)
+
+# (Optional) Tabs: keep only custom tabs (uncomment to enforce)
+# **/tabs/**
+# !**/tabs/*__c.tab-meta.xml
+# !**/tabs/*__mdt.tab-meta.xml
+
+# (Optional) Custom Applications: keep only YOUR namespace/apps (commented by default)
+# **/applications/**
+# !**/applications/YourAppName.app-meta.xml
+
+# =========================================================
+# NOTES:
+# - Flows under **/flows/** are allowed (we only ignore flowDefinitions).
+# - LWC stays included (no ignore on **/lwc/**).
+# - Profiles are excluded; use Permission Sets/Perm Set Groups instead.
+# - If you truly need a specific setting/app, remove its ignore line
+#   or add a targeted `!re-include` for that exact file.
+# =========================================================
 
