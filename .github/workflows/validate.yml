@@ -17,7 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
       - run: npm i -g @salesforce/cli @salesforce/sfdx-scanner
       - name: Auth Dev Hub
         run: echo "${{ secrets.SF_DEVHUB_AUTH_URL }}" | sf org login sfdx-url --set-default-dev-hub -a DevHub
