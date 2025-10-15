@@ -19,7 +19,8 @@ jobs:
       - uses: actions/setup-node@v4
       - run: npm i -g @salesforce/cli @salesforce/sfdx-scanner
       - name: Auth Dev Hub
-        run: echo "${{ secrets.SF_DEVHUB_AUTH_URL }}" | sf org login sfdx-url --set-default-dev-hub -a DevHub
+      - run: printf '%s' '${{ secrets.SF_DEVHUB_AUTH_URL }}' \
+          | sf org login sfdx-url --sfdx-url-stdin --set-default-dev-hub -a DevHub
       - name: Create Scratch Org
         run: sf org create scratch -f config/project-scratch-def.json -a "$ORG_ALIAS" -d 1 --no-track-source
       - name: Deploy
